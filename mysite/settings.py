@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-&&v%t7y!^bxh5*wukk18c7$k69w=gybk)pi93&67=5v*#4=n^6
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['django-video-audio-conferencing.onrender.com']
+ALLOWED_HOSTS = ['django-video-audio-conferencing.onrender.com','localhost','127.0.0.1']
 
 
 # Application definition
@@ -122,6 +122,8 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR,'static')
 ]
+
+STATIC_ROOT = 'staticfiles'
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
