@@ -23,9 +23,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-&&v%t7y!^bxh5*wukk18c7$k69w=gybk)pi93&67=5v*#4=n^6'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['django-video-audio-conferencing.onrender.com']
 
 
 # Application definition
