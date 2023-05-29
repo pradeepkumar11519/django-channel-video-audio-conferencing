@@ -239,8 +239,7 @@ const constraints = {
 
 const localVideo = document.querySelector("#local-video");
 
-var userMedia = navigator.mediaDevices
-    .getUserMedia(constraints)
+var userMedia = navigator.mediaDevices.getUserMedia(constraints)
     .then((stream) => {
         localStream = stream;
         localVideo.srcObject = localStream;

@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-&&v%t7y!^bxh5*wukk18c7$k69w=gybk)pi93&67=5v*#4=n^6
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['django-video-audio-conferencing.onrender.com','localhost','127.0.0.1']
+ALLOWED_HOSTS = ['django-video-audio-conferencing.onrender.com','localhost','127.0.0.1','167.99.192.225']
 
 
 # Application definition
