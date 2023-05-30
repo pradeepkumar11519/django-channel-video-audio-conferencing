@@ -1,5 +1,5 @@
 console.log("initialized");
-
+const roomName = JSON.parse(document.getElementById('room-name').textContent);
 var mapPeers = {};
 
 var labelusername = document.querySelector("#label-username");
@@ -40,8 +40,8 @@ btnJoin.addEventListener("click", (e) => {
     if (loc.protocol == "https:") {
         wsStart = "wss://";
     }
+    const endPoint = wsStart + window.location.host + '/ws/chat/' + roomName + '/'
 
-    var endPoint = wsStart + loc.host + loc.pathname;
 
     const addLocalTracks = (peer) => {
         localStream.getTracks().forEach((track) => {
@@ -57,19 +57,15 @@ btnJoin.addEventListener("click", (e) => {
         var remoteVideo = createVideo(Peerusername);
         setOnTrack(peer, remoteVideo);
 
-        peer.addEventListener("datachannel", (e) => {
-            peer.dc = e.channel;
-
-            peer.dc.addEventListener("message", (e) => {
-                var message = e.data;
-                const li = document.createElement("li");
-
-                var node = document.createTextNode(`${username} : ${message}`);
-                li.appendChild(node);
-                msgBox.appendChild(li);
-            });
-            mapPeers[Peerusername] = [peer, peer.dc];
-        });
+        peer.ondatachannel = (event) => {
+            const channel = event.channel;
+            channel.onopen = (event) => {
+              channel.send("Hi back!");
+            };
+            channel.onmessage = (event) => {
+              console.log(event.data);
+            };
+          };
 
         peer.addEventListener("iceconnectionstatechange", () => {
             var iceconnectionstatechange = peer.iceConnectionState;
@@ -117,18 +113,13 @@ btnJoin.addEventListener("click", (e) => {
         var peer = new RTCPeerConnection(null);
         addLocalTracks(peer);
 
-        var dc = peer.createDataChannel("channel");
-        dc.addEventListener("open", () => {
-            console.log("opened");
-        });
-        dc.addEventListener("message", (e) => {
-            var message = e.data;
-            const li = document.createElement("li");
-
-            var node = document.createTextNode(`${username} : ${message}`);
-            li.appendChild(node);
-            msgBox.appendChild(li);
-        });
+        var dc = peer.createDataChannel("chat");
+        dc.onopen = (event) => {
+            dc.send("Hi you!");
+        };
+        dc.onmessage = (event) => {
+            console.log(event.data);
+        };
 
         var remoteVideo = createVideo(Peerusername);
         setOnTrack(peer, remoteVideo);
@@ -200,13 +191,23 @@ btnJoin.addEventListener("click", (e) => {
 
             return;
         }
+        if(action == "new-msg"){
+            var msg = parseData['message']['msg'];
+            li = document.createElement('li')
+            console.log(mapPeers)
+            li.innerHTML = msg
+            msgBox.appendChild(li)
+            console.log()
+        }
+
     };
 
     websocket = new WebSocket(endPoint);
 
     const SendMessage = () => {
         var jsonStr = JSON.stringify({
-            message: msgInput.value,
+            message: {msg:msgInput.value},
+            action: "new-msg"
         });
         websocket.send(jsonStr);
     };

@@ -12,3 +12,9 @@ video{
     border-radius:25%;
     background-color:black;
 }
+
+
+#messages #message-list{
+    border:2px solid red;
+    background-color: red;
+}

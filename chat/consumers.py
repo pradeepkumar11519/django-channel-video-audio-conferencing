@@ -23,19 +23,33 @@ class ChatConsumer(WebsocketConsumer):
             self.room_group_name, self.channel_name
         )
 
+        print('Disconnected')
     # Receive message from WebSocket
-    def receive(self, text_data):
-        text_data_json = json.loads(text_data)
-        message = text_data_json["message"]
 
-        # Send message to room group
+    def receive(self, text_data):
+        receive_dict = json.loads(text_data)
+        message = receive_dict["message"]
+        action = receive_dict['action']
+        print(action)
+        if (action == "new-offer" or action == "new-answer"):
+            receiver_channel_name = receive_dict['message']['receiver_channel_name']
+            receive_dict['message']['receiver_channel_name'] = self.channel_name
+            async_to_sync(self.channel_layer.send)(
+                receiver_channel_name, {
+                    "type": "chat_message", "receive_dict": receive_dict}
+            )
+            return
+        print(receive_dict)
+        
+        receive_dict['message']['receiver_channel_name'] = self.channel_name
+
         async_to_sync(self.channel_layer.group_send)(
-            self.room_group_name, {"type": "chat_message", "message": message}
+            self.room_group_name, {"type": "chat_message", "receive_dict": receive_dict}
         )
 
     # Receive message from room group
     def chat_message(self, event):
-        message = event["message"]
-
+        receive_dict = event["receive_dict"]
+        print(receive_dict)
         # Send message to WebSocket
-        self.send(text_data=json.dumps({"message": message}))
+        self.send(text_data=json.dumps(receive_dict))
