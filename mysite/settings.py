@@ -26,9 +26,7 @@ SECRET_KEY = 'django-insecure-&&v%t7y!^bxh5*wukk18c7$k69w=gybk)pi93&67=5v*#4=n^6
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost','127.0.0.1']
-
-
+ALLOWED_HOSTS = ['127.0.0.1','localhost']
 
 
 # Application definition
@@ -42,13 +40,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'channels'
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     "whitenoise.middleware.WhiteNoiseMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -61,7 +60,7 @@ ROOT_URLCONF = 'mysite.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR,'templates')],
+        'DIRS': [os.path.join(BASE_DIR, 'build')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -87,7 +86,7 @@ ASGI_APPLICATION = "mysite.asgi.application"
 #     }
 # }
 DATABASES = {
-    "default":dj_database_url.config(default = 'postgres://root:jo8OcmlZLzxM0x8SI9LyK5CAKfvppwje@dpg-chpos6fdvk4goevgv70g-a.oregon-postgres.render.com/testvideoconferencing',ssl_require=True)
+    "default": dj_database_url.config(default='postgres://root:jo8OcmlZLzxM0x8SI9LyK5CAKfvppwje@dpg-chpos6fdvk4goevgv70g-a.oregon-postgres.render.com/testvideoconferencing', ssl_require=True)
 }
 
 # Password validation
@@ -126,10 +125,10 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR,'static')
-]
+os.path.join(BASE_DIR,'build','static'),
+]  #this will only work duirng development
 
-STATIC_ROOT = "staticfiles"
+STATIC_ROOT = os.path.join(BASE_DIR,'staticfiles')
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
@@ -138,11 +137,12 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        'CONFIG':{
-            'hosts':[('127.0.0.1','6380')]
-        },
-    },
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
 }
 
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+
+CORS_ORIGIN_ALLOW_ALL = True
+

@@ -1,55 +1,63 @@
-# chat/consumers.py
+# websocket_app/consumers.py
+
+from channels.generic.websocket import AsyncJsonWebsocketConsumer
+
 import json
 
-from asgiref.sync import async_to_sync
-from channels.generic.websocket import WebsocketConsumer
+class ChatConsumer(AsyncJsonWebsocketConsumer):
+    async def connect(self):
+        self.userID = None
+        self.room_group_name = 'room_group'
+        await self.channel_layer.group_add(self.room_group_name, self.channel_name)
+        await self.accept()
 
-
-class ChatConsumer(WebsocketConsumer):
-    def connect(self):
-        self.room_name = self.scope["url_route"]["kwargs"]["room_name"]
-        self.room_group_name = "chat_%s" % self.room_name
-
-        # Join room group
-        async_to_sync(self.channel_layer.group_add)(
-            self.room_group_name, self.channel_name
-        )
-
-        self.accept()
-
-    def disconnect(self, close_code):
-        # Leave room group
-        async_to_sync(self.channel_layer.group_discard)(
-            self.room_group_name, self.channel_name
-        )
-
-        print('Disconnected')
-    # Receive message from WebSocket
-
-    def receive(self, text_data):
-        receive_dict = json.loads(text_data)
-        message = receive_dict["message"]
-        action = receive_dict['action']
-        print(action)
-        if (action == "new-offer" or action == "new-answer"):
-            receiver_channel_name = receive_dict['message']['receiver_channel_name']
-            receive_dict['message']['receiver_channel_name'] = self.channel_name
-            async_to_sync(self.channel_layer.send)(
-                receiver_channel_name, {
-                    "type": "chat_message", "receive_dict": receive_dict}
+    async def disconnect(self, close_code):
+        await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    'type': 'user_disconnected',
+                    'userID': self.userID,
+                }
             )
-            return
-        print(receive_dict)
-        
-        receive_dict['message']['receiver_channel_name'] = self.channel_name
 
-        async_to_sync(self.channel_layer.group_send)(
-            self.room_group_name, {"type": "chat_message", "receive_dict": receive_dict}
+        await super().disconnect(close_code)
+
+    async def receive_json(self, text_data):
+        text_data_json = text_data
+        event = text_data_json['event']
+        print(text_data_json)
+        if event == 'join-room':
+            self.userID = text_data_json['userID']
+            print(self.userID)
+            await self.join_room(text_data_json['roomID'], text_data_json['userID'])
+        elif event == 'sent-connection':
+            await self.send_type(text_data_json['roomID'])
+
+    async def join_room(self, roomID, userID):
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                'type': 'user_connected',
+                'roomID': roomID,
+                'userID': userID,
+                
+                
+            }
         )
+        await self.channel_layer.group_add(roomID, self.channel_name)
 
-    # Receive message from room group
-    def chat_message(self, event):
-        receive_dict = event["receive_dict"]
-        print(receive_dict)
-        # Send message to WebSocket
-        self.send(text_data=json.dumps(receive_dict))
+    async def user_connected(self, event):
+        await self.send_json({
+            'event': 'user-connected',
+            'userID': event['userID'],
+            
+            
+        })
+
+    
+    async def user_disconnected(self, event):
+        print('user diconnected called')
+        await self.send_json({
+            'event': 'user-disconnected',
+            'userID': self.userID,
+        })

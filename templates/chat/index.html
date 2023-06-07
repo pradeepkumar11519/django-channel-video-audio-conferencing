@@ -5,10 +5,30 @@
     <meta charset="utf-8"/>
     <title>Chat Rooms</title>
 </head>
+<style>
+    body{
+        margin:20px;
+        padding:20px;
+    }
+    .input{
+        margin:20px 0px;
+        padding:10px;
+        font-weight:bold;
+        width:500px;
+    }
+    .join-btn{
+        padding:10px;
+        margin:20px 0px;
+        border-radius:10px;
+        background-color:black;
+        color:white;
+        cursor:pointer;
+    }
+</style>
 <body>
-    What chat room would you like to enter?<br>
-    <input id="room-name-input" type="text" size="100"><br>
-    <input id="room-name-submit" type="button" value="Enter">
+    <h1>What chat room would you like to enter ?</h1><br>
+    <input class="input" id="room-name-input" type="text" size="100"><br>
+    <input id="room-name-submit" class="join-btn" type="button" value="Enter">
 
     <script>
         document.querySelector('#room-name-input').focus();
